@@ -3,7 +3,7 @@ import { Component, inject } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { auth } from '../../firebase.config';
 import { createUserWithEmailAndPassword, sendEmailVerification, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar'
 
 
@@ -19,6 +19,7 @@ export class Signup {
   btnText = true;
   private snackBar = inject(MatSnackBar);
   public builder = inject(FormBuilder);
+  public route = inject(Router)
 
   signUp = this.builder.group({
     userName: ['', [Validators.required, Validators.minLength(2)]],
@@ -51,6 +52,7 @@ export class Signup {
               panelClass: ['success-snackbar'] }
             );
             this.signUp.reset();
+            this.route.navigate(['/signIn'])
           })
           .catch((error) => {
             this.isLoading = false;

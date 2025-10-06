@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { auth } from '../../firebase.config'
 import { signInWithEmailAndPassword, signOut, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
@@ -18,6 +18,7 @@ export class Signin {
   btnText = true;
   private snackBar = inject(MatSnackBar);
   public builder = inject(FormBuilder);
+  public route = inject(Router);
 
   signIn = this.builder.group({
     eMail: ['', [Validators.required, Validators.email]],
@@ -45,6 +46,7 @@ export class Signin {
             panelClass: ['success-snackbar']
           });
           this.signIn.reset()
+          // this.route.navigate([''])
         } else {
           // alert('Please verify your email before logging in.');
           this.snackBar.open(`Please verify your email before logging in.`, 'Close', {
@@ -59,10 +61,14 @@ export class Signin {
       .catch((error) => {
         this.isLoading = false;
          this.btnText = true;
-        // console.error('Login error:', error);
+         const errorCode = error.code;
+        console.error('Login error:', errorCode);
+        console.log(JSON.stringify(error, null, 2));
+
+
         // alert(`Error: ${error.message}`);
 
-        switch (error.code) {
+        switch (errorCode) {
           case 'auth/invalid-email':
             this.showError('Invalid email address. Please enter a valid one.');
             break;
@@ -80,6 +86,9 @@ export class Signin {
             break;
           case 'auth/network-request-failed':
             this.showError('Network error. Check your internet connection.');
+            break;
+          case 'auth/invalid-credential':
+            this.showError('Invalid email or password. Please check your details and try again.');
             break;
           default:
             this.showError('An unknown error occurred. Please try again.');
