@@ -16,6 +16,7 @@ import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar'
 })
 export class Signup {
   isLoading = false;
+  btnText = true;
   private snackBar = inject(MatSnackBar);
   public builder = inject(FormBuilder);
 
@@ -27,14 +28,20 @@ export class Signup {
 
 
   signUpBtn() {
+    this.isLoading = true;
+    this.btnText = false;
     const { eMail, passWord } = this.signUp.value;
 
     createUserWithEmailAndPassword(auth, eMail!, passWord!)
       .then((userCredential) => {
+        this.isLoading = false;
+         this.btnText = true;
         const user = userCredential.user;
 
         sendEmailVerification(user)
           .then(() => {
+            this.isLoading = false;
+            this.btnText = true;
             this.snackBar.open(
               `Signup successful! A verification link has been sent to ${user.email}.`,
               'Close',
@@ -46,6 +53,8 @@ export class Signup {
             this.signUp.reset();
           })
           .catch((error) => {
+            this.isLoading = false;
+            this.btnText = true;
             switch (error.code) {
               case 'auth/missing-email':
                 this.showWarning('Email address missing.');
@@ -62,6 +71,8 @@ export class Signup {
           });
       })
       .catch((error) => {
+        this.isLoading = false;
+        this.btnText = true;
         switch (error.code) {
           case 'auth/email-already-in-use':
             this.showError('This email is already in use. Try signing up with another email.');

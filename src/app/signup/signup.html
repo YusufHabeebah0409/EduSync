@@ -36,10 +36,9 @@
 
 
         <button type="submit" [disabled]="signUp.invalid" (click)="signUpBtn()">
-            Sign Up
-            <div>
-
-                <svg viewBox="25 25 50 50">
+            <span *ngIf="btnText">Sign Up</span>
+            <div *ngIf="isLoading">
+                <svg class="loader" viewBox="25 25 50 50">
                     <circle r="20" cy="50" cx="50"></circle>
                 </svg>
             </div>

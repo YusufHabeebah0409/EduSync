@@ -117,7 +117,7 @@ button:last-child:hover {
     background: #f7f7f7;
 }
 
-/* Small Text Under the Form */
+
 small {
   display: block;
   margin-top: 5px;
@@ -138,7 +138,43 @@ small a:hover {
   text-decoration: underline;
 }
 
+.loader {
+ width: 1.25em;
+ transform-origin: center;
+ animation: rotate4 2s linear infinite;
+}
 
+circle {
+ fill: none;
+ stroke: #fff;
+ stroke-width: 2;
+ stroke-dasharray: 1, 200;
+ stroke-dashoffset: 0;
+ stroke-linecap: round;
+ animation: dash4 1.5s ease-in-out infinite;
+}
+
+@keyframes rotate4 {
+ 100% {
+  transform: rotate(360deg);
+ }
+}
+
+@keyframes dash4 {
+ 0% {
+  stroke-dasharray: 1, 200;
+  stroke-dashoffset: 0;
+ }
+
+ 50% {
+  stroke-dasharray: 90, 200;
+  stroke-dashoffset: -35px;
+ }
+
+ 100% {
+  stroke-dashoffset: -125px;
+ }
+}
 
 @media (max-width: 500px) {
     form {

@@ -14,6 +14,8 @@ import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
   styleUrl: './signin.css'
 })
 export class Signin {
+  isLoading = false;
+  btnText = true;
   private snackBar = inject(MatSnackBar);
   public builder = inject(FormBuilder);
 
@@ -23,11 +25,15 @@ export class Signin {
   });
 
   signInBtn() {
+    this.isLoading = true;
+    this.btnText = false;
     const { eMail, passWord } = this.signIn.value;
 
     signInWithEmailAndPassword(auth, eMail!, passWord!)
 
       .then((userCredential) => {
+        this.isLoading = false;
+         this.btnText = true;
         const user = userCredential.user;
         if (user.emailVerified) {
           // alert('Login successful 🎉');
@@ -51,6 +57,8 @@ export class Signin {
         }
       })
       .catch((error) => {
+        this.isLoading = false;
+         this.btnText = true;
         // console.error('Login error:', error);
         // alert(`Error: ${error.message}`);
 
