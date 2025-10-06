@@ -4,7 +4,7 @@
         <h3>EduSync</h3>
         <p>Connecting students with resources</p>
 
-        <input type="text" placeholder="Name" formControlName="userName" >
+        <input type="text" placeholder="Name" formControlName="userName">
         @if (signUp.get('userName')?.errors && signUp.get('userName')?.touched) {
         <p class="text-danger" *ngIf="signUp.get('userName')?.hasError('minlength')">
             First name cannot be less than 2 characters
@@ -26,15 +26,24 @@
         <input type="password" placeholder="Password" formControlName="passWord">
         @if (signUp.get('passWord')?.errors && signUp.get('passWord')?.touched) {
         <p class="text-danger" *ngIf="signUp.get('passWord')?.hasError('pattern')">
-           Password must containt at least 1 uppercase, 1 lowercase, 1 special character, a number and must not be less than 8 characters
+            Password must containt at least 1 uppercase, 1 lowercase, 1 special character, a number and must not be less
+            than 8 characters
         </p>
         <p class="text-danger" *ngIf="signUp.get('passWord')?.hasError('required')">
             Password cannot be empty
         </p>
         }
-        
-        
-        <button type="submit" [disabled]="signUp.invalid" (click)="signUpBtn()"> Sign Up</button>
+
+
+        <button type="submit" [disabled]="signUp.invalid" (click)="signUpBtn()">
+            Sign Up
+            <div>
+
+                <svg viewBox="25 25 50 50">
+                    <circle r="20" cy="50" cx="50"></circle>
+                </svg>
+            </div>
+        </button>
 
         <button (click)="googleBtn()">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="48" viewBox="0 0 48 48">
@@ -51,7 +60,7 @@
             <span>Sign Up With Google</span>
         </button>
 
-       <small>Already have an account? <a routerLink="/signIn">Sign In </a> </small>
+        <small>Already have an account? <a routerLink="/signIn">Sign In </a> </small>
 
     </form>
 </main>

@@ -4,14 +4,17 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angu
 import { RouterLink } from '@angular/router';
 import { auth } from '../../firebase.config'
 import { signInWithEmailAndPassword, signOut, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
+
 
 @Component({
   selector: 'app-signin',
-  imports: [ReactiveFormsModule, CommonModule, FormsModule, RouterLink],
+  imports: [ReactiveFormsModule, CommonModule, FormsModule, RouterLink, MatSnackBarModule],
   templateUrl: './signin.html',
   styleUrl: './signin.css'
 })
 export class Signin {
+  private snackBar = inject(MatSnackBar);
   public builder = inject(FormBuilder);
 
   signIn = this.builder.group({
@@ -22,23 +25,58 @@ export class Signin {
   signInBtn() {
     const { eMail, passWord } = this.signIn.value;
 
-    signInWithEmailAndPassword(auth, eMail, passWord)
+    signInWithEmailAndPassword(auth, eMail!, passWord!)
 
       .then((userCredential) => {
         const user = userCredential.user;
-
-        // ✅ Check if the user's email is verified
         if (user.emailVerified) {
-          alert('Login successful 🎉');
-          console.log('User logged in:', user);
+          // alert('Login successful 🎉');
+          // console.log('User logged in:', user);
+          this.snackBar.open(`Login successful 🎉`, 'Close', {
+            duration: 3000,
+            horizontalPosition: 'right',
+            verticalPosition: 'top',
+            panelClass: ['success-snackbar']
+          });
+          this.signIn.reset()
         } else {
-          alert('Please verify your email before logging in.');
-          signOut(auth); // 🚪 logs the user out immediately
+          // alert('Please verify your email before logging in.');
+          this.snackBar.open(`Please verify your email before logging in.`, 'Close', {
+            duration: 4000,
+            horizontalPosition: 'right',
+            verticalPosition: 'top',
+            panelClass: ['warning-snackbar']
+          });
+          signOut(auth);
         }
       })
       .catch((error) => {
-        console.error('Login error:', error);
-        alert(`Error: ${error.message}`);
+        // console.error('Login error:', error);
+        // alert(`Error: ${error.message}`);
+
+        switch (error.code) {
+          case 'auth/invalid-email':
+            this.showError('Invalid email address. Please enter a valid one.');
+            break;
+          case 'auth/user-disabled':
+            this.showError('This account has been disabled. Contact support.');
+            break;
+          case 'auth/user-not-found':
+            this.showError('No account found with this email. Please sign up first.');
+            break;
+          case 'auth/wrong-password':
+            this.showError('Incorrect password. Please try again.');
+            break;
+          case 'auth/too-many-requests':
+            this.showError('Too many failed attempts. Try again later.');
+            break;
+          case 'auth/network-request-failed':
+            this.showError('Network error. Check your internet connection.');
+            break;
+          default:
+            this.showError('An unknown error occurred. Please try again.');
+            break;
+        }
       });
 
   }
@@ -46,15 +84,76 @@ export class Signin {
   googleBtn() {
     const provider = new GoogleAuthProvider();
     signInWithPopup(auth, provider)
-    .then((result) => {
-      console.log(result);
-      
-    
-  }).catch((error) => {
-    const errorMessage = error.message;
-    console.log(errorMessage);
-    
-  });
+      .then((result) => {
+        // console.log(result);
+        this.snackBar.open('Signed in with Google successfully!', 'Close', {
+          duration: 3000,
+          horizontalPosition: 'right',
+          verticalPosition: 'top',
+          panelClass: ['success-snackbar']
+        });
 
+      }).catch((error) => {
+        // const errorMessage = error.message;
+        // console.log(errorMessage);
+
+        switch (error.code) {
+          case 'auth/popup-closed-by-user':
+            this.showWarning('You closed the sign-in popup before completing the process.');
+            break;
+          case 'auth/cancelled-popup-request':
+            this.showWarning('Popup closed. Try signing in again.');
+            break;
+          case 'auth/popup-blocked':
+            this.showWarning('Popup was blocked by your browser. Allow popups and retry.');
+            break;
+          case 'auth/account-exists-with-different-credential':
+            this.showError('This email is already linked with another sign-in method.');
+            break;
+          case 'auth/invalid-credential':
+            this.showError('Invalid Google credentials. Try again.');
+            break;
+          case 'auth/operation-not-allowed':
+            this.showError('Google sign-in not enabled. Contact admin.');
+            break;
+          case 'auth/network-request-failed':
+            this.showError('Network error. Please check your connection.');
+            break;
+          case 'auth/unauthorized-domain':
+            this.showError('This domain is not authorized for Google sign-in.');
+            break;
+          default:
+            this.showError(`Google sign-in failed`);
+        }
+
+      });
+
+  }
+
+  private showSuccess(message: string) {
+    this.snackBar.open(message, 'Close', {
+      duration: 3500,
+      horizontalPosition: 'right',
+      verticalPosition: 'top',
+      panelClass: ['success-snackbar']
+    });
+  }
+
+  private showError(message: string) {
+    this.snackBar.open(message, 'Close', {
+      duration: 4000,
+      horizontalPosition: 'right',
+      verticalPosition: 'top',
+      panelClass: ['error-snackbar']
+    });
+  }
+
+  private showWarning(message: string) {
+    this.snackBar.open(message, 'Close', {
+      duration: 4000,
+      horizontalPosition: 'right',
+      verticalPosition: 'top',
+      panelClass: ['warning-snackbar']
+    });
   }
 }

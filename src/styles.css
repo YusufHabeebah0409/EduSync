@@ -1,1 +1,33 @@
 /* You can add global styles to this file, and also import other style files */
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+.success-snackbar .mdc-snackbar__surface {
+  background-color:  #4CAF50 !important; 
+  color: #fff !important;
+  font-weight: 300;
+  border-radius: 6px;
+}
+
+
+.error-snackbar .mdc-snackbar__surface {
+  background-color: #fff !important; 
+  color:#E53935!important;
+  font-weight: 300;
+  border-radius: 6px;
+}
+
+.warning-snackbar .mdc-snackbar__surface {
+  background-color:#ffc107 !important; 
+  color: #000 !important;
+  font-weight: 300;
+  border-radius: 6px;
+}
+
+/* ✅ Customize action button (the "Close" text) */
+.mdc-snackbar__actions .mdc-button__label {
+  color: #E53935 !important;
+  font-weight: 600;
+}
+
