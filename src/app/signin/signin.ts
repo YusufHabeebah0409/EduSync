@@ -37,8 +37,6 @@ export class Signin {
          this.btnText = true;
         const user = userCredential.user;
         if (user.emailVerified) {
-          // alert('Login successful 🎉');
-          // console.log('User logged in:', user);
           this.snackBar.open(`Login successful 🎉`, 'Close', {
             duration: 3000,
             horizontalPosition: 'right',
@@ -46,16 +44,15 @@ export class Signin {
             panelClass: ['success-snackbar']
           });
           this.signIn.reset()
-          // this.route.navigate([''])
+          this.route.navigate(['/dashboard'])
         } else {
-          // alert('Please verify your email before logging in.');
           this.snackBar.open(`Please verify your email before logging in.`, 'Close', {
             duration: 4000,
             horizontalPosition: 'right',
             verticalPosition: 'top',
             panelClass: ['warning-snackbar']
           });
-          signOut(auth);
+          // signOut(auth);
         }
       })
       .catch((error) => {
@@ -112,7 +109,7 @@ export class Signin {
 
       }).catch((error) => {
         // const errorMessage = error.message;
-        // console.log(errorMessage);
+        // console.log(error);
 
         switch (error.code) {
           case 'auth/popup-closed-by-user':
