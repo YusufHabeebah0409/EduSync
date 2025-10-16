@@ -3,6 +3,7 @@ import { Component, inject } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { auth } from '../../firebase.config';
 import { createUserWithEmailAndPassword, sendEmailVerification, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { getDatabase, ref, set, onValue } from 'firebase/database';
 import { Router, RouterLink } from '@angular/router';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar'
 
@@ -15,6 +16,7 @@ import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar'
   styleUrl: './signup.css'
 })
 export class Signup {
+  database = getDatabase();
   isLoading = false;
   btnText = true;
   private snackBar = inject(MatSnackBar);
@@ -28,31 +30,60 @@ export class Signup {
   });
 
 
+
+
   signUpBtn() {
     this.isLoading = true;
     this.btnText = false;
     const { eMail, passWord } = this.signUp.value;
 
     createUserWithEmailAndPassword(auth, eMail!, passWord!)
+
       .then((userCredential) => {
         this.isLoading = false;
-         this.btnText = true;
+        this.btnText = true;
         const user = userCredential.user;
 
         sendEmailVerification(user)
+          //  Email Verification 
           .then(() => {
+
             this.isLoading = false;
             this.btnText = true;
-            this.snackBar.open(
-              `Signup successful! A verification link has been sent to ${user.email}.`,
-              'Close',
-              { duration: 4000, 
-              horizontalPosition: 'right', 
-              verticalPosition: 'top', 
-              panelClass: ['success-snackbar'] }
-            );
-            this.signUp.reset();
-            this.route.navigate(['/signIn'])
+
+            // Storing user data in Realtime Database
+
+            const dataRef = ref(this.database, 'users/0' + user.uid);
+
+            const users = {
+              userName: this.signUp.value.userName,
+              eMail: this.signUp.value.eMail,
+            };
+            onValue(dataRef, (snapshot) => {
+              const data = snapshot.val();
+
+              if (data?.eMail === users.eMail) {
+                this.showError('User already exists. Please sign in instead.');
+              } else {
+                set(dataRef, users);
+                this.snackBar.open(
+                  `Signup successful! A verification link has been sent to ${user.email}.`,
+                  'Close',
+                  {
+                    duration: 4000,
+                    horizontalPosition: 'right',
+                    verticalPosition: 'top',
+                    panelClass: ['success-snackbar']
+                  }
+                );
+                 this.signUp.reset();
+                this.route.navigate(['/signIn']);
+              }
+            }, { onlyOnce: true });
+
+
+
+           
           })
           .catch((error) => {
             this.isLoading = false;
@@ -79,18 +110,6 @@ export class Signup {
           case 'auth/email-already-in-use':
             this.showError('This email is already in use. Try signing up with another email.');
             break;
-          case 'auth/invalid-email':
-            this.showWarning('Invalid email format. Please check and try again.');
-            break;
-          case 'auth/weak-password':
-            this.showWarning('Weak password. Use 8+ chars, 1 uppercase, 1 number, and 1 symbol.');
-            break;
-          case 'auth/missing-password':
-            this.showWarning('Please enter a password.');
-            break;
-          case 'auth/missing-email':
-            this.showWarning('Please enter your email address.');
-            break;
           case 'auth/operation-not-allowed':
             this.showError('Email/password sign-up is disabled. Contact admin.');
             break;
@@ -115,8 +134,33 @@ export class Signup {
   googleBtn() {
     const provider = new GoogleAuthProvider();
     signInWithPopup(auth, provider)
-      .then(() => {
-        this.showSuccess('Signed in with Google successfully!');
+      .then((response) => {
+
+         // Storing user data in Realtime Database
+
+            const dataRef = ref(this.database, 'users/0' + response.user.uid);
+
+            const users = {
+              userName: response.user.displayName,
+              eMail: response.user.email,
+            };
+            onValue(dataRef, (snapshot) => {
+              const data = snapshot.val();
+
+              if (data?.eMail === users.eMail) {
+                // this.showError('User already exists. Please sign in instead.');
+                this.route.navigate(['/dashboard']);
+
+              } else {
+                 this.showSuccess('Signed in with Google successfully!');
+                set(dataRef, users);
+        
+                this.route.navigate(['/dashboard']);
+
+              }
+            }, { onlyOnce: true });
+       
+
       })
       .catch((error) => {
         switch (error.code) {
@@ -176,4 +220,9 @@ export class Signup {
       panelClass: ['warning-snackbar']
     });
   }
+
+
+
+
+
 }

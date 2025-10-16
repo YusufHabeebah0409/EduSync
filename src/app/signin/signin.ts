@@ -4,6 +4,7 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angu
 import { Router, RouterLink } from '@angular/router';
 import { auth } from '../../firebase.config'
 import { signInWithEmailAndPassword, signOut, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { getDatabase, ref, set, onValue } from 'firebase/database'
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 
 
@@ -14,6 +15,8 @@ import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
   styleUrl: './signin.css'
 })
 export class Signin {
+  database = getDatabase();
+
   isLoading = false;
   btnText = true;
   private snackBar = inject(MatSnackBar);
@@ -95,54 +98,69 @@ export class Signin {
 
   }
 
-  googleBtn() {
-    const provider = new GoogleAuthProvider();
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        // console.log(result);
-        this.snackBar.open('Signed in with Google successfully!', 'Close', {
-          duration: 3000,
-          horizontalPosition: 'right',
-          verticalPosition: 'top',
-          panelClass: ['success-snackbar']
+   googleBtn() {
+      const provider = new GoogleAuthProvider();
+      signInWithPopup(auth, provider)
+        .then((response) => {
+  
+           // Storing user data in Realtime Database
+  
+              const dataRef = ref(this.database, 'users/0' + response.user.uid);
+  
+              const users = {
+                userName: response.user.displayName,
+                eMail: response.user.email,
+              };
+              onValue(dataRef, (snapshot) => {
+                const data = snapshot.val();
+  
+                if (data?.eMail === users.eMail) {
+                  // this.showError('User already exists. Please sign in instead.');
+                  this.route.navigate(['/dashboard']);
+  
+                } else {
+                   this.showSuccess('Signed in with Google successfully!');
+                  set(dataRef, users);
+          
+                  this.route.navigate(['/dashboard']);
+  
+                }
+              }, { onlyOnce: true });
+         
+  
+        })
+        .catch((error) => {
+          switch (error.code) {
+            case 'auth/popup-closed-by-user':
+              this.showWarning('You closed the sign-in popup before completing the process.');
+              break;
+            case 'auth/cancelled-popup-request':
+              this.showWarning('Popup closed. Try signing in again.');
+              break;
+            case 'auth/popup-blocked':
+              this.showWarning('Popup was blocked by your browser. Allow popups and retry.');
+              break;
+            case 'auth/account-exists-with-different-credential':
+              this.showError('This email is already linked with another sign-in method.');
+              break;
+            case 'auth/invalid-credential':
+              this.showError('Invalid Google credentials. Try again.');
+              break;
+            case 'auth/operation-not-allowed':
+              this.showError('Google sign-in not enabled. Contact admin.');
+              break;
+            case 'auth/network-request-failed':
+              this.showError('Network error. Please check your connection.');
+              break;
+            case 'auth/unauthorized-domain':
+              this.showError('This domain is not authorized for Google sign-in.');
+              break;
+            default:
+              this.showError(`Google sign-in failed`);
+          }
         });
-
-      }).catch((error) => {
-        // const errorMessage = error.message;
-        // console.log(error);
-
-        switch (error.code) {
-          case 'auth/popup-closed-by-user':
-            this.showWarning('You closed the sign-in popup before completing the process.');
-            break;
-          case 'auth/cancelled-popup-request':
-            this.showWarning('Popup closed. Try signing in again.');
-            break;
-          case 'auth/popup-blocked':
-            this.showWarning('Popup was blocked by your browser. Allow popups and retry.');
-            break;
-          case 'auth/account-exists-with-different-credential':
-            this.showError('This email is already linked with another sign-in method.');
-            break;
-          case 'auth/invalid-credential':
-            this.showError('Invalid Google credentials. Try again.');
-            break;
-          case 'auth/operation-not-allowed':
-            this.showError('Google sign-in not enabled. Contact admin.');
-            break;
-          case 'auth/network-request-failed':
-            this.showError('Network error. Please check your connection.');
-            break;
-          case 'auth/unauthorized-domain':
-            this.showError('This domain is not authorized for Google sign-in.');
-            break;
-          default:
-            this.showError(`Google sign-in failed`);
-        }
-
-      });
-
-  }
+    }
+  
 
   private showSuccess(message: string) {
     this.snackBar.open(message, 'Close', {
