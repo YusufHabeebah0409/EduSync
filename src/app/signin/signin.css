@@ -33,7 +33,7 @@ form:hover {
 form img {
     display: block;
     margin: 0 auto 0.5rem;
-    border-radius: 12px;
+    border-radius: 12px; 
 }
 
 h3 {

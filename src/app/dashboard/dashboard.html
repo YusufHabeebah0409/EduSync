@@ -1,4 +1,35 @@
-<main>
-    <h2>Welcome back!</h2>
-    <button (click)="signOut()">Sign Out</button>
+<main class="dashboard">
+    <header class="dashboard-header">
+        <div class="dashboard-brand">
+            <img src="assets/logo.png" alt="EduSync Logo" class="brand-logo" />
+            <h3 class="brand-name">EduSync</h3>
+        </div>
+
+        <div class="dashboard-welcome">
+            <h2 class="animate__animated animate__pulse animate__infinite">Welcome, {{ userName }} 🤗</h2>
+        </div>
+
+        <div class="dashboard-actions">
+            <button class="signout-btn" (click)="signOut()">Sign Out</button>
+        </div>
+    </header>
+
+    <section class="dashboard-content">
+        <header class="content-header">
+            <h1>Dashboard</h1>
+            <p>All your academic resources in one place.</p>
+        </header>
+
+
+    </section>
 </main>
+
+<div class="content-actions">
+    <button class="add-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="22" viewBox="0 0 24 24">
+            <path fill="currentColor"
+                d="M18 12.998h-5v5a1 1 0 0 1-2 0v-5H6a1 1 0 0 1 0-2h5v-5a1 1 0 0 1 2 0v5h5a1 1 0 0 1 0 2" />
+        </svg>
+    </button>
+    <span class="tooltip-text">Add Resources</span>
+</div>
